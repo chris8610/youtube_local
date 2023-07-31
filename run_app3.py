@@ -75,7 +75,7 @@ if option == 'YouTube':
 
 
     else:
-        st.sidebar.write('入力されたURLには "youtube.com/watch?v=" が含まれていません')
+        st.sidebar.write('URLが正しく入力されていません')
 
 elif option == 'ローカルファイル':
     # ローカルの動画ファイルをアップロードしてもらう
