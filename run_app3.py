@@ -12,26 +12,7 @@ import streamlit as st
 from PIL import Image
 import requests
 from io import BytesIO
-
-# ユーザーにYouTubeのURLを入力してもらう
-url = st.text_input('YouTubeのURLを入力してください')
-
-# URLから'youtube.com/watch?v='の後ろの文字列を抽出
-if 'youtube.com/watch?v=' in url:
-    your_movie = url.split('youtube.com/watch?v=')[-1].split('&')[0]
-    st.write(f'your_movie = {your_movie}')
-
-    # サムネイル画像のURLを作成
-    thumbnail_url = f'https://img.youtube.com/vi/{your_movie}/0.jpg'
-
-    # サムネイル画像を取得し表示
-    response = requests.get(thumbnail_url)
-    img = Image.open(BytesIO(response.content))
-    st.image(img, caption='サムネイル画像', use_column_width=True)
-else:
-    st.write('入力されたURLには "youtube.com/watch?v=" が含まれていません')
-
-
+import subprocess
 
 mp_drawing = mp.solutions.drawing_utils  # 検出した特徴点を描画
 mp_drawing_styles = mp.solutions.drawing_styles  # 点や線の色、太さなどのスタイル
@@ -75,6 +56,24 @@ if option == 'YouTube':
         response = requests.get(thumbnail_url)
         img = Image.open(BytesIO(response.content))
         st.sidebar.image(img, caption='サムネイル画像', use_column_width=True)
+
+        # yt-dlpを使用して動画をダウンロード
+        download_cmd = f'yt-dlp -f "bestvideo[ext=mp4]" --output "your_full.%(ext)s" https://www.youtube.com/watch?v={your_movie}'
+        process = subprocess.run(download_cmd, shell=True, check=True)
+
+        # ダウンロードした動画のパスを取得
+        video_file = 'your_full.mp4'  # yt-dlpの出力形式に合わせてパスを指定
+
+        if process.returncode == 0:  # コマンドが成功した場合
+            video = load_video(open(video_file, 'rb'))  # ファイルをバイナリモードで開いてload_videoに渡す
+            st.video(video_file)  # ここでvideo_fileを直接使ってstreamlitで表示
+            # 以降、解析などの処理を書くことが可能です。video変数はOpenCVのVideoCaptureオブジェクトです。
+
+        else:
+            st.sidebar.write('動画のダウンロードに失敗しました')
+
+
+
     else:
         st.sidebar.write('入力されたURLには "youtube.com/watch?v=" が含まれていません')
 
