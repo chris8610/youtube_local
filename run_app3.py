@@ -84,6 +84,14 @@ if option == 'YouTube':
         # YouTube動画をダウンロードして切り取る
         video_file = download_youtube_video(url, start_time, end_time)
 
+        import os
+
+        # ファイルパスが存在するか確認する
+        if os.path.exists(video_file):
+            print(f"{video_file} exists.")
+        else:
+            print(f"{video_file} does not exist.")
+
         # 切り取った動画を表示
         st.video(video_file)
 
