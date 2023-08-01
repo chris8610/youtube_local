@@ -65,10 +65,7 @@ if option == 'YouTube':
         video_file = 'your_full.mp4'  # yt-dlpの出力形式に合わせてパスを指定
 
         if process.returncode == 0:  # コマンドが成功した場合
-            video = load_video(open(video_file, 'rb'))  # ファイルをバイナリモードで開いてload_videoに渡す
-            st.video(video_file)  # ここでvideo_fileを直接使ってstreamlitで表示
-            # 以降、解析などの処理を書くことが可能です。video変数はOpenCVのVideoCaptureオブジェクトです。
-
+            st.sidebar.write(f'動画がダウンロードされました: {video_file}')
         else:
             st.sidebar.write('動画のダウンロードに失敗しました')
     else:
