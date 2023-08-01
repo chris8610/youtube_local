@@ -53,14 +53,6 @@ if option == 'YouTube':
         start_time = st.sidebar.text_input('切り取り開始時間を指定してください（形式: hh:mm:ss）')
         end_time = st.sidebar.text_input('切り取り終了時間を指定してください（形式: hh:mm:ss）')
 
-        # サムネイル画像のURLを作成
-        thumbnail_url = f'https://img.youtube.com/vi/{your_movie}/0.jpg'
-
-        # サムネイル画像を取得し表示
-        response = requests.get(thumbnail_url)
-        img = Image.open(BytesIO(response.content))
-        st.sidebar.image(img, caption='サムネイル画像', use_column_width=True)
-
         # yt-dlpを使用して動画をダウンロード
         # ffmpegの -ss (開始時間) オプションと -to (終了時間) オプションを利用して動画を切り取る
         download_cmd = f'yt-dlp -f "bestvideo[ext=mp4]" --output "downloaded.%(ext)s" --postprocessor-args "-ss {start_time} -to {end_time}" https://www.youtube.com/watch?v={your_movie}'
@@ -71,6 +63,9 @@ if option == 'YouTube':
 
         if process.returncode == 0:  # コマンドが成功した場合
             st.sidebar.write(f'動画がダウンロードされました: {video_file}')
+            # ダウンロードした動画を表示
+            st.video(video_file)
+
         else:
             st.sidebar.write('動画のダウンロードに失敗しました')
     else:
