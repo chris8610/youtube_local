@@ -71,9 +71,6 @@ if option == 'YouTube':
 
         else:
             st.sidebar.write('動画のダウンロードに失敗しました')
-
-
-
     else:
         st.sidebar.write('URLが正しく入力されていません')
 
