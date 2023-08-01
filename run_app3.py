@@ -40,6 +40,34 @@ def load_video(video_file):  # video_fileを読み込む関数
 # ユーザーにYouTubeかローカルのどちらから動画を読み込むかを選択させる
 option = st.sidebar.radio('動画の読み込み方法を選択してください', ('YouTube', 'ローカルファイル'))
 
+import os
+import tempfile
+from pytube import YouTube
+
+def download_youtube_video(youtube_url, start_time, end_time):
+    yt = YouTube(youtube_url)
+
+    # 最高品質のストリームを選択
+    stream = yt.streams.get_highest_resolution()
+
+    # テンポラリファイルを作成
+    with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as temp_file:
+        temp_filename = temp_file.name
+
+    # ダウンロード
+    stream.download(filename=temp_filename)
+
+    # ダウンロードした動画を指定した時間で切り取る
+    output_filename = 'output.mp4'
+    cut_cmd = f'ffmpeg -i {temp_filename} -ss {start_time} -to {end_time} -c copy {output_filename}'
+    os.system(cut_cmd)
+
+    # テンポラリファイルを削除
+    os.remove(temp_filename)
+
+    return output_filename
+
+
 if option == 'YouTube':
     # YouTubeのURLを入力してもらう
     url = st.sidebar.text_input('YouTubeのURLを入力してください')
@@ -53,21 +81,12 @@ if option == 'YouTube':
         start_time = st.sidebar.text_input('切り取り開始時間を指定してください（形式: hh:mm:ss）')
         end_time = st.sidebar.text_input('切り取り終了時間を指定してください（形式: hh:mm:ss）')
 
-        # yt-dlpを使用して動画をダウンロード
-        # ffmpegの -ss (開始時間) オプションと -to (終了時間) オプションを利用して動画を切り取る
-        download_cmd = f'yt-dlp -f "bestvideo[ext=mp4]" --output "downloaded.%(ext)s" --postprocessor-args "-ss {start_time} -to {end_time}" https://www.youtube.com/watch?v={your_movie}'
-        process = subprocess.run(download_cmd, shell=True, check=True)
+        # YouTube動画をダウンロードして切り取る
+        video_file = download_youtube_video(url, start_time, end_time)
 
-        # ダウンロードした動画のパスを取得
-        video_file = 'downloaded.mp4'  # yt-dlpの出力形式に合わせてパスを指定
+        # 切り取った動画を表示
+        st.video(video_file)
 
-        if process.returncode == 0:  # コマンドが成功した場合
-            st.sidebar.write(f'動画がダウンロードされました: {video_file}')
-            # ダウンロードした動画を表示
-            st.video(video_file)
-
-        else:
-            st.sidebar.write('動画のダウンロードに失敗しました')
     else:
         st.sidebar.write('URLが正しく入力されていません')
 
