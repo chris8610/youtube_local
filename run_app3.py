@@ -49,6 +49,10 @@ if option == 'YouTube':
         your_movie = url.split('youtube.com/watch?v=')[-1].split('&')[0]
         st.sidebar.write(f'your_movie = {your_movie}')
 
+        # 切り取りたい時間を指定してもらう
+        start_time = st.sidebar.text_input('切り取り開始時間を指定してください（形式: hh:mm:ss）')
+        end_time = st.sidebar.text_input('切り取り終了時間を指定してください（形式: hh:mm:ss）')
+
         # サムネイル画像のURLを作成
         thumbnail_url = f'https://img.youtube.com/vi/{your_movie}/0.jpg'
 
@@ -58,11 +62,12 @@ if option == 'YouTube':
         st.sidebar.image(img, caption='サムネイル画像', use_column_width=True)
 
         # yt-dlpを使用して動画をダウンロード
-        download_cmd = f'yt-dlp -f "bestvideo[ext=mp4]" --output "your_full.%(ext)s" https://www.youtube.com/watch?v={your_movie}'
+        # ffmpegの -ss (開始時間) オプションと -to (終了時間) オプションを利用して動画を切り取る
+        download_cmd = f'yt-dlp -f "bestvideo[ext=mp4]" --output "downloaded.%(ext)s" --postprocessor-args "-ss {start_time} -to {end_time}" https://www.youtube.com/watch?v={your_movie}'
         process = subprocess.run(download_cmd, shell=True, check=True)
 
         # ダウンロードした動画のパスを取得
-        video_file = 'your_full.mp4'  # yt-dlpの出力形式に合わせてパスを指定
+        video_file = 'downloaded.mp4'  # yt-dlpの出力形式に合わせてパスを指定
 
         if process.returncode == 0:  # コマンドが成功した場合
             st.sidebar.write(f'動画がダウンロードされました: {video_file}')
@@ -81,8 +86,6 @@ elif option == 'ローカルファイル':
         # 以降、解析などの処理を書くことが可能です。video変数はOpenCVのVideoCaptureオブジェクトです。
     else:
         st.sidebar.write('動画ファイルがアップロードされていません')
-
-
 
 
 
